@@ -144,6 +144,14 @@ export class RichInputfile extends LitElement {
     fileButton.addEventListener('change', this._fileValueChange);
   }
 
+  setFileArrayUint8(fileArrayUint8) {
+    this.fileArrayUint8 = new Uint8Array(fileArrayUint8);
+    this.value = 'file_generated_from_uint8.png';
+    this.urlFilePath = URL.createObjectURL(
+      new Blob([this.fileArrayUint8.buffer], { type: 'image/png' })
+    );
+  }
+
   setValue(urlFilePath) {
     this.urlFilePath = urlFilePath;
     this.value = urlFilePath.replace(/^.*[\\\/]/, '');
