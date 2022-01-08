@@ -40,6 +40,9 @@ export class RichInputfile extends LitElement {
         type: Boolean,
         attribute: 'show-thumbnail',
       },
+      urlFile: {
+        type: String,
+      },
       fileArrayBuffer: {
         type: Array,
       },
@@ -63,7 +66,7 @@ export class RichInputfile extends LitElement {
     this.fileAllowed = false;
     this.errorMsg = '';
     this.thumbnailWidth = 50;
-    this.urlFile = '';
+    this.urlFilePath = '';
     this.fileArrayBuffer = null;
     this.fileArrayUint8 = null;
     this.showLabel = false;
@@ -73,6 +76,7 @@ export class RichInputfile extends LitElement {
   }
 
   firstUpdated() {
+    this.typesRegExp = new RegExp(`(?:${this.allowedExtensions.join('|')})$`);
     this.sdomMsgLayer = this.shadowRoot.querySelector('#msg');
     const componentCreatedEvent = new CustomEvent('wc-ready', {
       detail: {
@@ -82,20 +86,19 @@ export class RichInputfile extends LitElement {
       },
     });
     document.dispatchEvent(componentCreatedEvent);
-    this.main();
+    this._main();
   }
 
   updated(changedProperties) {
     changedProperties.forEach((oldValue, propName) => {
       if (propName === 'value') {
-        const typesRegExp = new RegExp(`(?:${this.allowedExtensions.join('|')})$`);
-        this.fileAllowed = (this.value !== '') ? (this.value.search(typesRegExp) !== -1) : false;
+        this.fileAllowed = (this.value !== '') ? (this.value.search(this.typesRegExp) !== -1) : false;
         this.errorMsg = ``;
         if (this.value !== '') {
           if (!this.fileAllowed) {
             this.errorMsg = `${this.value} is not allowed. Files allowed: ${this.allowedExtensions.join(',')}`;
             this.value = '';
-            this.urlFile = '';
+            this.urlFilePath = '';
           }
         }
       }
@@ -104,7 +107,7 @@ export class RichInputfile extends LitElement {
 
   _deleteValue() {
     this.value = '';
-    this.urlFile = '';
+    this.urlFilePath = '';
     this.shadowRoot.querySelector('.bloque1 button').classList.add('invisible');
     this.shadowRoot.querySelector('#fileButton').value = '';
   }
@@ -113,7 +116,7 @@ export class RichInputfile extends LitElement {
     const file = e.target.files[0];
     if (file) {
       this._getFileArrayBuffer();
-      this.urlFile = URL.createObjectURL(file);
+      this.urlFilePath = URL.createObjectURL(file);
       this.value = file.name;
       this.shadowRoot.querySelector('.bloque1 button').classList.remove('invisible');
     }
@@ -130,17 +133,42 @@ export class RichInputfile extends LitElement {
     fileReader.readAsArrayBuffer(fileData);
   }
 
-  main() {
+  _getImgThumbnail(name) {
+    this.fileAllowed = (this.value !== '') ? (this.value.search(this.typesRegExp) !== -1) : false;
+    return (this.fileAllowed && this.showThumbnail) ? html`<img src="${this.urlFilePath}" alt="file ${name}" title="${this.value}" width="${this.thumbnailWidth}">` : html``;
+  }
+
+  _main() {
     const fileButton = this.shadowRoot.querySelector('#fileButton');
     this.shadowRoot.querySelector('.bloque1 button').addEventListener('click', this._deleteValue);
     fileButton.addEventListener('change', this._fileValueChange);
+  }
+
+  setValue(urlFilePath) {
+    this.urlFilePath = urlFilePath;
+    this.value = urlFilePath.replace(/^.*[\\\/]/, '');
+    const xhr = new XMLHttpRequest();
+    xhr.open("GET", urlFilePath, true);
+    xhr.responseType = "arraybuffer";
+    const self = this;
+    xhr.onload = function() {
+      self.fileArrayUint8= new Uint8Array(this.response);
+    };
+    xhr.send();
+  }
+
+  getFileValue() {
+    return this.shadowRoot.querySelector('input').files[0];
+  }
+
+  getFileArrayUint8() {
+    return this.fileArrayUint8;
   }
 
   render() {
     const name = this.name.split('/').pop();
     const deleteBtnClass = (this.value !== '') ? '': 'invisible';
     const labelClass = (!this.showLabel) ? 'invisible': '';
-    const fileImg = (this.fileAllowed && this.showThumbnail) ? html`<img src="${this.urlFile}" alt="file ${name}" title="${this.value}" width="${this.thumbnailWidth}">` : html``;
     return html`
       <section class="wrapper">
         <div class="bloque1">
@@ -153,7 +181,7 @@ export class RichInputfile extends LitElement {
           </div>
         </div>
         <div class="bloque2">
-          ${(this.value !== '') ? fileImg : html``}
+          ${(this.value !== '') ? this._getImgThumbnail(name) : html``}
         </div>
       </section>
       <div id="filelink"></div>
