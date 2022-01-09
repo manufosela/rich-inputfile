@@ -109,7 +109,7 @@ export class RichInputfile extends LitElement {
     this.value = '';
     this.urlFilePath = '';
     this.shadowRoot.querySelector('.bloque1 button').classList.add('invisible');
-    this.shadowRoot.querySelector('#fileButton').value = '';
+    this.shadowRoot.querySelector('#fileField').value = '';
   }
 
   _fileValueChange(e) {
@@ -139,9 +139,9 @@ export class RichInputfile extends LitElement {
   }
 
   _main() {
-    const fileButton = this.shadowRoot.querySelector('#fileButton');
+    const fileField = this.shadowRoot.querySelector('#fileField');
     this.shadowRoot.querySelector('.bloque1 button').addEventListener('click', this._deleteValue);
-    fileButton.addEventListener('change', this._fileValueChange);
+    fileField.addEventListener('change', this._fileValueChange);
   }
 
   setFileArrayUint8(fileArrayUint8) {
@@ -155,14 +155,16 @@ export class RichInputfile extends LitElement {
   setValue(urlFilePath) {
     this.urlFilePath = urlFilePath;
     this.value = urlFilePath.replace(/^.*[\\\/]/, '');
-    const xhr = new XMLHttpRequest();
-    xhr.open("GET", urlFilePath, true);
-    xhr.responseType = "arraybuffer";
-    const self = this;
-    xhr.onload = function() {
-      self.fileArrayUint8= new Uint8Array(this.response);
-    };
-    xhr.send();
+    if (this.value) {
+      const xhr = new XMLHttpRequest();
+      xhr.open("GET", urlFilePath, true);
+      xhr.responseType = "arraybuffer";
+      const self = this;
+      xhr.onload = function() {
+        self.fileArrayUint8= new Uint8Array(this.response);
+      };
+      xhr.send();
+    }
   }
 
   getFileValue() {
@@ -182,8 +184,8 @@ export class RichInputfile extends LitElement {
         <div class="bloque1">
           <label class="${labelClass}">${name}</label>
           <div style="display:flex">
-            <label for="fileButton">Selecciona un fichero
-            <input type="file" value="upload" id="fileButton">
+            <label for="fileField">Selecciona un fichero
+            <input type="file" value="upload" id="fileField">
             </label>
             <button id="delete" class="${deleteBtnClass}">Delete</button>
           </div>
