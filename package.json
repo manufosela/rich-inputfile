@@ -3,7 +3,7 @@
   "description": "Webcomponent rich-inputfile following open-wc recommendations",
   "license": "MIT",
   "author": "manufosela",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "main": "rich-inputfile.js",
   "module": "rich-inputfile.js",
   "scripts": {
@@ -24,7 +24,7 @@
     "@open-wc/eslint-config": "^4.3.0",
     "@open-wc/testing": "next",
     "@web/dev-server": "^0.1.25",
-    "@web/dev-server-storybook": "next",
+    "@web/dev-server-storybook": "^0.0.2",
     "@web/test-runner": "^0.13.20",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",

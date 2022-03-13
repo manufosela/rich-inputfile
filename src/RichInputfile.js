@@ -119,6 +119,14 @@ export class RichInputfile extends LitElement {
       this.urlFilePath = URL.createObjectURL(file);
       this.value = file.name;
       this.shadowRoot.querySelector('.bloque1 button').classList.remove('invisible');
+      const fileUploadedEvent = new CustomEvent('file-uploaded', {
+        detail: {
+          id: this.id,
+          componentName: this.tagName,
+          component: this,
+          file: file,
+        },
+      });
     }
   }
 
