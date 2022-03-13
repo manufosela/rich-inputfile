@@ -124,9 +124,10 @@ export class RichInputfile extends LitElement {
           id: this.id,
           componentName: this.tagName,
           component: this,
-          file: file,
+          file,
         },
       });
+      document.dispatchEvent(fileUploadedEvent);
     }
   }
 
